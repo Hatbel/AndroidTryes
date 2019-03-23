@@ -1,72 +1,64 @@
 # AndroidTryes
+// Pie Chart class
+package com.example.testb;
 
-package com.example.smt;
-import java.net.URL;
-
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
-private TextView mTeVi;
-    private TextView mTeVi1;
-    private TextView mTeVi2;
-    private EditText edTex;
+@SuppressLint("ViewConstructor")
+public class PieCh extends View {
+    float start = 0;
+    int[] data;
+    int numberOfParts;
+    private int[] color;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mTeVi = (TextView) findViewById(R.id.textView);
-        mTeVi1 = (TextView) findViewById(R.id.textView2);
-        mTeVi2 = (TextView) findViewById(R.id.textView3);
-        edTex = (EditText) findViewById(R.id.editText);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-       FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+    public PieCh(Context context, int numOfItems, int[] data, int[] color){
+        super(context);
+        setFocusable(true);
+        this.numberOfParts = numOfItems;
+        this.data = data;
+        this.color = color;
     }
-
-    public void onClick(View view) {
-        mTeVi.setText(edTex.getText());
-        mTeVi1.setText(edTex.getText());
-        mTeVi2.setText(edTex.getText());
-
-    }
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    protected void onDraw(Canvas canvas){
+        super.onDraw(canvas);
+        canvas.drawColor(Color.WHITE);
+        @SuppressLint("DrawAllocation") Paint p = new Paint();
+        p.setAntiAlias(true);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(0);
+        p.setStyle(Paint.Style.FILL);
+        float[] scaledValues = scale();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        @SuppressLint("DrawAllocation") RectF rectF = new RectF(0,0,getWidth(),getWidth());
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        p.setColor(Color.BLACK);
+        for(int i = 0; i< numberOfParts; i++){
+            p.setColor(color[i]);
+            p.setStyle(Paint.Style.FILL);
+            canvas.drawArc(rectF,start,scaledValues[i],true,p);
+            start = start + scaledValues[i];
         }
-
-        return super.onOptionsItemSelected(item);
     }
+    private float[] scale() {
+        float[] scaledValues = new float[this.data.length];
+        float total = getTotal();
+        for (int i = 0; i < this.data.length; i++) {
+            scaledValues[i] = (this.data[i] / total) * 360;
+        }
+        return scaledValues;
+    }
+    private float getTotal(){
+        float total = 0;
+        for(float val:this.data)
+            total+=val;
+        return total;
+    }
+
 }
+
